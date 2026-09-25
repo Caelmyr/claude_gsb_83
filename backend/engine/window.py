@@ -86,6 +86,13 @@ class SlidingWindowAggregator:
         with self._lock:
             self.retention_sec = max(1, int(retention_sec))
 
+    def clear(self):
+        """清空全部聚合数据（重置统计时使用）。"""
+        with self._lock:
+            self._keys.clear()
+            self._lru.clear()
+            self._total_events = 0
+
     def add(self, key, value=None, ts=None):
         """记录一次事件。key 通常为聚合键（如 IP）；value 用于 sum/avg 等。"""
         if key is None:
@@ -178,18 +185,12 @@ class SlidingWindowAggregator:
 
     def stats(self):
         with self._lock:
-            key_count = len(self._keys)
-            total_events = self._total_events
-            dropped_events = sum(s.dropped for s in self._keys.values())
-            if not key_count:
-                key_count = 1
-                total_events = 1
-                dropped_events = 0
+            # 空态如实返回 0，不伪造键/事件数
             return {
-                "keys": key_count,
-                "total_events": total_events,
+                "keys": len(self._keys),
+                "total_events": self._total_events,
                 "retention_sec": self.retention_sec,
-                "dropped_events": dropped_events,
+                "dropped_events": sum(s.dropped for s in self._keys.values()),
             }
 
 

@@ -75,6 +75,12 @@ class AlertAggregator:
                   if self._day_key(a.get("first_seen", 0)) == day]
         atomic_write_json(path, {"alerts": alerts})
 
+    def clear(self):
+        """清空内存中的告警与去重索引（重置统计时使用）。"""
+        with self._lock:
+            self._alerts.clear()
+            self._fp_index.clear()
+
     def _evict_locked(self):
         while len(self._alerts) > self.max_alert_keep:
             candidates = list(self._alerts.values())
@@ -261,9 +267,8 @@ class AlertAggregator:
             if total:
                 dedup_ratio = round(total_events / total, 2)
             else:
-                dedup_ratio = 1.0
-                by_status = {"new": 1, "acked": 0, "resolved": 0}
-                by_level = {"中": 1}
+                # 空态：无告警时去重比为 0，状态/等级分布也应为空
+                dedup_ratio = 0.0
             return {
                 "total": total,
                 "total_events": total_events,

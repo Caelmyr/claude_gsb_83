@@ -361,10 +361,11 @@ class RiskEngine:
         hit_n = c["matched"]
         reject_n = c["rejected"]
         if total == 0:
-            hit_rate = 1.0
-            reject_rate = 1.0
+            # 空态：无事件时各比率/均值均为 0，不能给非零兜底值误导判断
+            hit_rate = 0.0
+            reject_rate = 0.0
             avg_score = 0.0
-            avg_us = 100
+            avg_us = 0
             denom = 1
         else:
             denom = total
@@ -394,3 +395,6 @@ class RiskEngine:
             self._counters = {"total": 0, "matched": 0, "rejected": 0, "alerted": 0,
                               "risk_score_sum": 0.0, "elapsed_us_sum": 0.0}
             self._minute_series = {}
+            # 同步清空聚合窗口与告警去重状态，保证重置后立即查询各指标均为空态 0
+            self.window.clear()
+            self.alerts.clear()

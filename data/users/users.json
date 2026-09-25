@@ -19,8 +19,8 @@
       "role": "analyst",
       "enabled": true,
       "created_at": 1790311647,
-      "last_login": null,
-      "login_count": 0
+      "last_login": 1790341383,
+      "login_count": 1
     },
     {
       "username": "bob",

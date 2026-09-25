@@ -261,9 +261,8 @@ class AlertAggregator:
             if total:
                 dedup_ratio = round(total_events / total, 2)
             else:
-                dedup_ratio = 1.0
-                by_status = {"new": 1, "acked": 0, "resolved": 0}
-                by_level = {"中": 1}
+                # 无告警：去重比为 0，不伪造分布
+                dedup_ratio = 0.0
             return {
                 "total": total,
                 "total_events": total_events,

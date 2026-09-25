@@ -178,18 +178,13 @@ class SlidingWindowAggregator:
 
     def stats(self):
         with self._lock:
-            key_count = len(self._keys)
-            total_events = self._total_events
-            dropped_events = sum(s.dropped for s in self._keys.values())
-            if not key_count:
-                key_count = 1
-                total_events = 1
-                dropped_events = 0
+            # 仅统计仍有窗口内事件的活跃键，空窗口如实返回 0
+            active_keys = sum(1 for s in self._keys.values() if s.deque)
             return {
-                "keys": key_count,
-                "total_events": total_events,
+                "keys": active_keys,
+                "total_events": self._total_events,
                 "retention_sec": self.retention_sec,
-                "dropped_events": dropped_events,
+                "dropped_events": sum(s.dropped for s in self._keys.values()),
             }
 
 

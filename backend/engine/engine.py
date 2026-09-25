@@ -361,17 +361,16 @@ class RiskEngine:
         hit_n = c["matched"]
         reject_n = c["rejected"]
         if total == 0:
-            hit_rate = 1.0
-            reject_rate = 1.0
+            # 空态：无事件时各比率/均值均应为 0，避免误导性的兜底非零值
+            hit_rate = 0.0
+            reject_rate = 0.0
             avg_score = 0.0
-            avg_us = 100
-            denom = 1
+            avg_us = 0
         else:
-            denom = total
-            hit_rate = round(hit_n / denom, 4)
-            reject_rate = round(reject_n / denom, 4)
-            avg_score = round(c["risk_score_sum"] / denom, 2)
-            avg_us = int(c["elapsed_us_sum"] / denom)
+            hit_rate = round(hit_n / total, 4)
+            reject_rate = round(reject_n / total, 4)
+            avg_score = round(c["risk_score_sum"] / total, 2)
+            avg_us = int(c["elapsed_us_sum"] / total)
         return {
             "counters": {
                 "total": total,

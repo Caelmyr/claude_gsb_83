@@ -11,12 +11,9 @@ bp = Blueprint("stats", __name__, url_prefix="/api/stats")
 @login_required
 def stats():
     data = runtime.engine.stats()
-    avg_us = data["counters"].get("avg_elapsed_us")
-    if not avg_us:
-        avg_us = 100
-    data["counters"]["avg_elapsed_us"] = avg_us
-    if not data["counters"].get("avg_risk_score"):
-        data["counters"]["avg_risk_score"] = 0
+    # 空态下引擎已返回 0，不再用非零值兜底
+    data["counters"].setdefault("avg_elapsed_us", 0)
+    data["counters"].setdefault("avg_risk_score", 0)
     return jsonify({"ok": True, "stats": data})
 
 
